@@ -4,6 +4,19 @@
 
 Built for the DEV Presage SmartSpectra SDK Challenge with `@smartspectra/node-sdk` 3.5.0.
 
+## What it looks like
+
+<table>
+<tr>
+<td><img src="docs/screenshots/not-enough-light.png" alt="Lamplight reporting that the room is too dark" width="420"></td>
+<td><img src="docs/screenshots/clear-room.png" alt="Lamplight reading pulse and breathing with confidence values" width="420"></td>
+</tr>
+<tr>
+<td><b>The room is the problem.</b> Named, with one instruction. The readings say <code>not measured</code> and explain why.</td>
+<td><b>The signal came back.</b> Pulse and breathing, each with the sensor's own confidence attached.</td>
+</tr>
+</table>
+
 ---
 
 ## The problem
