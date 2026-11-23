@@ -6,15 +6,19 @@
 <title>Lamplight</title>
 <style>
   :root {
-    --ink: #0b0d10;
+    --ink: #0a0c0f;
     --panel: #12161b;
-    --line: #1f262e;
-    --dim: #6b7784;
-    --text: #e8edf2;
+    --sunk: #0d1115;
+    --line: #1e252d;
+    --line-2: #2a323c;
+    --dim: #67737f;
+    --text: #eaf0f5;
     --amber: #f0a828;
-    --amber-soft: rgba(240,168,40,.12);
+    --amber-soft: rgba(240,168,40,.10);
     --red: #e2564a;
+    --red-soft: rgba(226,86,74,.10);
     --green: #4ea87a;
+    --green-soft: rgba(78,168,122,.10);
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
@@ -23,99 +27,176 @@
     background: var(--ink);
     color: var(--text);
     font: 15px/1.55 ui-sans-serif, -apple-system, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
     display: flex; align-items: center; justify-content: center;
-    padding: 32px 20px;
+    padding: 40px 22px;
   }
-  .app { width: 100%; max-width: 760px; }
+  .app { width: 100%; max-width: 720px; }
 
-  header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 28px; }
+  /* ---------- header ---------- */
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
   .mark {
-    width: 26px; height: 26px; border-radius: 50%;
+    width: 27px; height: 27px; border-radius: 50%; flex: none;
     background: radial-gradient(circle at 50% 38%, var(--amber) 0%, #7a5312 62%, #2a1d08 100%);
-    box-shadow: 0 0 26px rgba(240,168,40,.42);
-    align-self: center;
+    box-shadow: 0 0 28px rgba(240,168,40,.5);
   }
-  h1 { font-size: 19px; font-weight: 600; margin: 0; letter-spacing: -.01em; }
+  h1 { font-size: 18px; font-weight: 600; margin: 0; letter-spacing: -.015em; }
   .tag { color: var(--dim); font-size: 13px; }
 
+  /* ---------- the card ---------- */
   .stage {
     background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 26px 26px 22px;
-    min-height: 300px;
-    display: flex; flex-direction: column;
+    border-radius: 18px;
+    overflow: hidden;
   }
 
-  /* ---- idle ---- */
-  .idle h2 { margin: 0 0 8px; font-size: 22px; font-weight: 600; letter-spacing: -.02em; }
-  .idle p { margin: 0 0 6px; color: var(--dim); max-width: 52ch; }
-  .idle ul { margin: 16px 0 22px; padding-left: 18px; color: var(--dim); font-size: 14px; }
-  .idle li { margin-bottom: 5px; }
-
-  /* ---- measuring: the cause ---- */
-  .cause-eyebrow { font-size: 11px; letter-spacing: .13em; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
-  .cause-title {
-    font-size: 27px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2;
-    margin: 0 0 12px; color: var(--amber);
+  /* ---------- THE ROOM band ---------- */
+  .room {
+    padding: 22px 26px 24px;
+    border-bottom: 1px solid var(--line);
+    transition: background .35s;
   }
-  .cause-fix {
-    font-size: 16px; color: var(--text); margin: 0 0 4px;
-    padding-left: 14px; border-left: 2px solid var(--amber);
+  .room.amber { background: rgba(240,168,40,.045); }
+  .room.green { background: rgba(78,168,122,.05); }
+  .room.neutral { background: none; }
+
+  .eyebrow {
+    font-size: 10.5px; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 8px;
   }
-  .cause-clear .cause-title { color: var(--green); }
-  .cause-clear .cause-fix { border-left-color: var(--green); }
-
-  .status-line {
-    margin-top: 22px; font-size: 13px; color: var(--dim);
-    display: flex; gap: 18px; flex-wrap: wrap;
-    border-top: 1px solid var(--line); padding-top: 14px;
+  .headline {
+    font-size: 30px; font-weight: 600; letter-spacing: -.028em; line-height: 1.12;
+    margin: 0 0 10px; color: var(--text);
+    transition: color .3s;
   }
-  .status-line b { color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
+  .headline.amber { color: var(--amber); }
+  .headline.green { color: var(--green); }
 
-  /* ---- readings ---- */
-  .readings { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: auto; padding-top: 22px; }
-  .card { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: #0e1216; }
-  .card .k { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
-  .card .v { font-size: 30px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-top: 2px; }
-  .card .u { font-size: 13px; color: var(--dim); font-weight: 400; margin-left: 3px; }
-  .card .m { font-size: 12px; color: var(--dim); margin-top: 3px; }
-  .card.pending .v { font-size: 15px; font-weight: 400; color: var(--dim); letter-spacing: 0; }
-  .card.empty .v { color: var(--red); font-size: 15px; font-weight: 500; letter-spacing: 0; }
+  .fix {
+    font-size: 15.5px; margin: 0; color: #c3ccd6;
+    display: flex; gap: 11px; align-items: flex-start;
+  }
+  .fix .bar {
+    width: 2px; align-self: stretch; background: var(--line-2);
+    border-radius: 1px; flex: none; margin-top: 2px;
+  }
+  .fix.amber .bar { background: var(--amber); }
+  .fix.green .bar { background: var(--green); }
 
-  /* ---- receipt ---- */
-  .receipt h2 { margin: 0 0 4px; font-size: 20px; font-weight: 600; }
-  .receipt .sub { color: var(--dim); font-size: 13px; margin-bottom: 20px; }
-  .rline { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
-  .rline:last-of-type { border-bottom: 0; }
+  /* ---------- readings: the hero ---------- */
+  .readings {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--line);
+  }
+  .reading {
+    padding: 26px 26px 24px;
+    border-right: 1px solid var(--line);
+    background: var(--sunk);
+    transition: background .3s;
+  }
+  .reading:last-child { border-right: 0; }
+  .reading .k {
+    font-size: 10.5px; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 10px;
+  }
+  .reading .v {
+    font-size: 58px; font-weight: 600; letter-spacing: -.045em;
+    line-height: 1; font-variant-numeric: tabular-nums;
+    display: flex; align-items: baseline; gap: 7px;
+    color: var(--text);
+  }
+  .reading .v .u { font-size: 17px; font-weight: 400; color: var(--dim); letter-spacing: 0; }
+  .reading .m {
+    font-size: 12.5px; color: var(--dim); margin-top: 11px; min-height: 18px;
+  }
+  .reading .m b { color: #93a0ad; font-weight: 500; }
+
+  .reading.pending .v { font-size: 19px; font-weight: 400; color: #4e5a66; letter-spacing: -.01em; }
+  .reading.empty { background: var(--red-soft); }
+  .reading.empty .v { font-size: 19px; font-weight: 500; color: var(--red); letter-spacing: -.01em; }
+  .reading.empty .m { color: #8c5c58; }
+
+  /* ---------- status strip ---------- */
+  .strip {
+    display: flex; gap: 26px; align-items: center;
+    padding: 14px 26px; font-size: 12.5px; color: var(--dim);
+    border-bottom: 1px solid var(--line);
+  }
+  .strip b { color: #9dabb8; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .strip .dot + span { margin-left: -8px; }
+  .strip .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+    flex: none; animation: pulse 2s infinite;
+  }
+  .strip .dot.off { background: var(--dim); animation: none; }
+  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
+
+  /* ---------- actions ---------- */
+  .actions { padding: 18px 26px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  button, a.btn {
+    font: inherit; font-weight: 500; font-size: 14.5px;
+    padding: 11px 20px; border-radius: 10px;
+    border: 1px solid var(--line-2); background: #19212a; color: var(--text);
+    cursor: pointer; text-decoration: none; display: inline-block;
+    transition: background .13s, border-color .13s, transform .08s;
+  }
+  button:hover:not(:disabled), a.btn:hover { background: #202a34; border-color: #354150; }
+  button:active:not(:disabled) { transform: translateY(1px); }
+  button:disabled { opacity: .4; cursor: default; }
+  button.primary {
+    background: var(--amber); border-color: var(--amber);
+    color: #1a1200; font-weight: 600;
+  }
+  button.primary:hover:not(:disabled) { background: #ffb93d; border-color: #ffb93d; }
+
+  /* ---------- idle ---------- */
+  .idle-inner { padding: 34px 30px 30px; }
+  .idle-inner h2 {
+    font-size: 25px; font-weight: 600; letter-spacing: -.025em; margin: 0 0 10px;
+  }
+  .idle-inner > p { color: var(--dim); margin: 0 0 22px; max-width: 50ch; font-size: 15px; }
+  .facts { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 26px; }
+  .fact {
+    flex: 1 1 150px; background: var(--sunk); border: 1px solid var(--line);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .fact .n { font-size: 12px; color: var(--dim); }
+  .fact .d { font-size: 13.5px; color: #b9c4cf; margin-top: 3px; }
+
+  /* ---------- receipt ---------- */
+  .receipt-inner { padding: 30px 30px 26px; }
+  .receipt-inner h2 { font-size: 22px; font-weight: 600; margin: 0 0 3px; }
+  .receipt-inner .sub { color: var(--dim); font-size: 13px; margin-bottom: 22px; word-break: break-all; }
+  .rline {
+    display: flex; justify-content: space-between; gap: 18px;
+    padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 14.5px;
+  }
   .rline .lab { color: var(--dim); }
   .rline .val { font-variant-numeric: tabular-nums; text-align: right; }
-  .null { color: var(--red); }
+  .rline .val.null { color: var(--red); font-weight: 500; }
   .statement {
-    margin-top: 18px; padding: 12px 14px; border-radius: 10px;
-    background: var(--amber-soft); border: 1px solid rgba(240,168,40,.25);
-    font-size: 13px; color: #f7dcae;
+    margin: 20px 0 4px; padding: 13px 15px; border-radius: 10px;
+    background: var(--amber-soft); border: 1px solid rgba(240,168,40,.22);
+    font-size: 13px; color: #e8cb96; line-height: 1.5;
   }
 
-  /* ---- buttons ---- */
-  .actions { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
-  button {
-    font: inherit; font-weight: 500; padding: 11px 20px; border-radius: 10px;
-    border: 1px solid var(--line); background: #1a2028; color: var(--text);
-    cursor: pointer; transition: background .12s, border-color .12s;
+  .err {
+    margin: 0 30px 20px; padding: 12px 15px; border-radius: 10px;
+    background: var(--red-soft); border: 1px solid rgba(226,86,74,.28);
+    color: #f0b0aa; font-size: 13.5px;
   }
-  button:hover:not(:disabled) { background: #222b35; border-color: #2c3742; }
-  button:disabled { opacity: .45; cursor: default; }
-  button.primary { background: var(--amber); border-color: var(--amber); color: #1a1200; font-weight: 600; }
-  button.primary:hover:not(:disabled) { background: #ffb93d; border-color: #ffb93d; }
-  a.btn { font: inherit; font-weight: 500; padding: 11px 20px; border-radius: 10px; border: 1px solid var(--line);
-          background: #1a2028; color: var(--text); text-decoration: none; display: inline-block; }
-  a.btn:hover { background: #222b35; }
-
-  .err { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: rgba(226,86,74,.1);
-         border: 1px solid rgba(226,86,74,.3); color: #f2b3ad; font-size: 13px; }
-  .foot { margin-top: 18px; font-size: 12px; color: #4d5764; text-align: center; }
+  .foot { margin-top: 16px; font-size: 12px; color: #414b56; text-align: center; }
   .hidden { display: none !important; }
+
+  @media (max-width: 560px) {
+    .readings { grid-template-columns: 1fr; }
+    .reading { border-right: 0; border-bottom: 1px solid var(--line); }
+    .reading:last-child { border-bottom: 0; }
+    .reading .v { font-size: 48px; }
+    .headline { font-size: 25px; }
+  }
 </style>
 </head>
 <body>
@@ -127,44 +208,50 @@
   </header>
 
   <div class="stage">
-    <!-- IDLE -->
-    <section id="idle" class="idle">
-      <h2>Sit down and hold still.</h2>
-      <p>Lamplight reads your pulse and breathing from the webcam, and tells you what to change when the room gets in the way.</p>
-      <ul>
-        <li>Face the screen with your upper body visible</li>
-        <li>Pulse takes about 12 seconds, breathing about 30</li>
-        <li>If it can't read you, it will say why — and never make a number up</li>
-      </ul>
-      <div class="actions">
-        <button id="startBtn" class="primary">Start measuring</button>
+
+    <!-- ───────────── IDLE ───────────── -->
+    <section id="idle">
+      <div class="idle-inner">
+        <h2>Sit down and hold still.</h2>
+        <p>Lamplight reads your pulse and breathing from the webcam — and tells you what to change when the room gets in the way.</p>
+        <div class="facts">
+          <div class="fact"><div class="n">Pulse</div><div class="d">~12 seconds</div></div>
+          <div class="fact"><div class="n">Breathing</div><div class="d">~30 seconds</div></div>
+          <div class="fact"><div class="n">Never</div><div class="d">a made-up number</div></div>
+        </div>
+        <div class="actions" style="padding:0">
+          <button id="startBtn" class="primary">Start measuring</button>
+        </div>
       </div>
       <div class="err hidden" id="idleErr"></div>
     </section>
 
-    <!-- MEASURING -->
+    <!-- ───────────── MEASURING ───────────── -->
     <section id="measuring" class="hidden">
-      <div class="cause-eyebrow" id="causeEyebrow">Camera</div>
-      <h2 class="cause-title" id="causeTitle">Starting…</h2>
-      <p class="cause-fix" id="causeFix">Waiting for the first frames.</p>
+      <div class="room neutral" id="roomBand">
+        <div class="eyebrow" id="eyebrow">Camera</div>
+        <h2 class="headline" id="headline">Starting…</h2>
+        <p class="fix" id="fix"><span class="bar"></span><span id="fixText">Waiting for the first frames.</span></p>
+      </div>
 
       <div class="readings">
-        <div class="card pending" id="pulseCard">
+        <div class="reading pending" id="pulseCard">
           <div class="k">Pulse</div>
           <div class="v" id="pulseVal">warming up…</div>
           <div class="m" id="pulseMeta">&nbsp;</div>
         </div>
-        <div class="card pending" id="breathCard">
+        <div class="reading pending" id="breathCard">
           <div class="k">Breathing</div>
           <div class="v" id="breathVal">warming up…</div>
           <div class="m" id="breathMeta">&nbsp;</div>
         </div>
       </div>
 
-      <div class="status-line">
+      <div class="strip">
+        <span id="liveDot" class="dot"></span>
         <span><b id="elapsed">0s</b> elapsed</span>
         <span><b id="packets">0</b> packets</span>
-        <span><b id="samples">0</b> readings seen</span>
+        <span><b id="samples">0</b> readings</span>
       </div>
 
       <div class="actions">
@@ -172,19 +259,23 @@
       </div>
     </section>
 
-    <!-- RECEIPT -->
-    <section id="receipt" class="receipt hidden">
-      <h2>Measurement receipt</h2>
-      <div class="sub" id="rsub">A local record of exactly what was and wasn't measured.</div>
-      <div id="rbody"></div>
-      <div class="statement">
-        Values shown in red were <strong>not measured</strong>. Lamplight does not estimate, infer, or fill in a reading it did not receive.
-      </div>
-      <div class="actions">
-        <a class="btn" id="downloadBtn" href="#" download>Download receipt</a>
-        <button id="againBtn">Measure again</button>
+    <!-- ───────────── RECEIPT ───────────── -->
+    <section id="receipt" class="hidden">
+      <div class="receipt-inner">
+        <h2>Measurement receipt</h2>
+        <div class="sub" id="rsub">A local record of exactly what was and wasn't measured.</div>
+        <div id="rbody"></div>
+        <div class="statement">
+          Values in red were <strong>not measured</strong>. Lamplight does not estimate, infer,
+          or fill in a reading it did not receive.
+        </div>
+        <div class="actions" style="padding:22px 0 0">
+          <button id="againBtn">Measure again</button>
+          <a class="btn" id="downloadBtn" href="#" download>Download receipt</a>
+        </div>
       </div>
     </section>
+
   </div>
 
   <div class="foot">Nothing is uploaded. The receipt stays on this computer.</div>
@@ -192,21 +283,66 @@
 
 <script>
 const $ = (id) => document.getElementById(id);
-const show = (id) => { for (const s of ['idle','measuring','receipt']) $(s).classList.toggle('hidden', s !== id); };
+const SECTIONS = ['idle', 'measuring', 'receipt'];
+const show = (id) => SECTIONS.forEach((s) => $(s).classList.toggle('hidden', s !== id));
 
-let WARMUP = { pulse: 12000, breathing: 30000 };
+const WARMUP = { pulse: 12000, breathing: 30000 };
 let latest = null;
-let tick = { elapsedMs: 0, packets: 0 };
+let tick = { elapsedMs: 0, packets: 0, pulseSamples: 0, breathSamples: 0 };
 
-function fmtDur(ms) {
+const fmtDur = (ms) => {
   const s = Math.floor(ms / 1000);
   return s < 60 ? s + 's' : Math.floor(s / 60) + 'm ' + (s % 60) + 's';
+};
+
+function setRoom(tone, eyebrow, headline, fixText) {
+  $('roomBand').className = 'room ' + tone;
+  $('headline').className = 'headline ' + (tone === 'amber' || tone === 'green' ? tone : '');
+  $('fix').className = 'fix ' + (tone === 'amber' || tone === 'green' ? tone : '');
+  $('eyebrow').textContent = eyebrow;
+  $('headline').textContent = headline;
+  $('fixText').textContent = fixText;
+}
+
+function setReading(which, data, age) {
+  const card = $(which + 'Card');
+  const val = $(which + 'Val');
+  const meta = $(which + 'Meta');
+
+  if (data) {
+    card.className = 'reading';
+    const unit = which === 'pulse' ? 'bpm' : '/min';
+    val.innerHTML = data.value.toFixed(0) + '<span class="u">' + unit + '</span>';
+    const bits = [];
+    if (data.confidence != null) bits.push('confidence ' + data.confidence.toFixed(0) + '%');
+    bits.push(data.stable ? 'stable' : 'settling');
+    meta.innerHTML = '<b>' + bits.join('</b> · <b>') + '</b>';
+  } else {
+    card.className = 'reading pending';
+    val.textContent = age < WARMUP[which]
+      ? 'warming up…'
+      : (which === 'pulse' ? 'listening for a pulse…' : 'listening for breathing…');
+    meta.innerHTML = '&nbsp;';
+  }
+}
+
+// When the room is the blocker, the reading is honestly absent — and the card
+// says why, citing the sensor rather than the person.
+function markUnreadable(blocked) {
+  for (const which of ['pulse', 'breath']) {
+    const card = $(which + 'Card');
+    if (blocked && !(which === 'pulse' ? latest?.pulse : latest?.breathing)) {
+      card.className = 'reading empty';
+      $(which + 'Val').textContent = 'not measured';
+      $(which + 'Meta').textContent = 'the room is blocking the signal';
+    }
+  }
 }
 
 function render(s) {
   latest = s;
 
-  if (s.phase === 'idle') { show('idle'); return; }
+  if (s.phase === 'idle') return show('idle');
   if (s.phase === 'error') {
     show('idle');
     const e = $('idleErr');
@@ -214,79 +350,40 @@ function render(s) {
     e.classList.remove('hidden');
     return;
   }
-  if (s.phase === 'stopped') { return; }
+  if (s.phase === 'stopped') return;
 
   show('measuring');
 
-  const waiting = s.phase === 'starting' || !s.startedAt;
-
-  // The cause is the headline. If there is no cause, say the room is fine.
-  const box = $('measuring');
-  if (waiting) {
-    $('causeEyebrow').textContent = 'Camera';
-    $('causeTitle').textContent = 'Starting…';
-    $('causeFix').textContent = 'Waiting for the first frames.';
-    box.classList.remove('cause-clear');
+  if (s.phase === 'starting' || !s.startedAt) {
+    setRoom('neutral', 'Camera', 'Starting…', 'Waiting for the first frames.');
   } else if (s.cause) {
-    $('causeEyebrow').textContent = 'The room';
-    $('causeTitle').textContent = s.cause.label;
-    $('causeFix').textContent = s.cause.fix;
-    box.classList.remove('cause-clear');
+    setRoom('amber', 'The room', s.cause.label, s.cause.fix);
   } else {
-    $('causeEyebrow').textContent = 'The room';
-    $('causeTitle').textContent = 'Clear';
-    $('causeFix').textContent = 'The camera can see you. Hold still.';
-    box.classList.add('cause-clear');
+    setRoom('green', 'The room', 'Clear', 'The camera can see you. Hold still.');
   }
 
   const age = s.startedAt ? Date.now() - s.startedAt : 0;
+  setReading('pulse', s.pulse, age);
+  setReading('breath', s.breathing, age);
 
-  // Pulse
-  const p = s.pulse;
-  const pCard = $('pulseCard');
-  if (p) {
-    pCard.className = 'card';
-    $('pulseVal').innerHTML = p.value.toFixed(0) + '<span class="u">bpm</span>';
-    const bits = [];
-    if (p.confidence != null) bits.push('confidence ' + p.confidence.toFixed(0) + '%');
-    bits.push(p.stable ? 'stable' : 'settling');
-    $('pulseMeta').textContent = bits.join(' · ');
-  } else {
-    pCard.className = 'card pending';
-    $('pulseVal').textContent = age < WARMUP.pulse ? 'warming up…' : 'listening for a pulse…';
-    $('pulseMeta').innerHTML = '&nbsp;';
-  }
-
-  // Breathing
-  const b = s.breathing;
-  const bCard = $('breathCard');
-  if (b) {
-    bCard.className = 'card';
-    $('breathVal').innerHTML = b.value.toFixed(0) + '<span class="u">/min</span>';
-    const bits = [];
-    if (b.confidence != null) bits.push('confidence ' + b.confidence.toFixed(0) + '%');
-    bits.push(b.stable ? 'stable' : 'settling');
-    $('breathMeta').textContent = bits.join(' · ');
-  } else {
-    bCard.className = 'card pending';
-    $('breathVal').textContent = age < WARMUP.breathing ? 'warming up…' : 'listening for breathing…';
-    $('breathMeta').innerHTML = '&nbsp;';
-  }
+  // A cause that stops the camera seeing us also stops any reading existing.
+  const blocking = s.cause && ['no_face', 'too_dark', 'chest_not_visible', 'too_bright']
+    .includes(s.cause.code);
+  markUnreadable(blocking);
 }
 
 function renderTick() {
   $('elapsed').textContent = fmtDur(tick.elapsedMs);
   $('packets').textContent = tick.packets;
-  const s = (tick.pulseSamples || 0) + (tick.breathSamples || 0);
-  $('samples').textContent = s;
+  $('samples').textContent = (tick.pulseSamples || 0) + (tick.breathSamples || 0);
+  $('liveDot').classList.toggle('off', !tick.elapsedMs);
 }
 
 function renderReceipt(r) {
   show('receipt');
   const rows = [];
-  const row = (lab, val, cls) => rows.push(
-    `<div class="rline"><span class="lab">${lab}</span><span class="val ${cls || ''}">${val}</span></div>`
-  );
+  const row = (lab, val, cls) =>
+    rows.push('<div class="rline"><span class="lab">' + lab + '</span><span class="val ' + (cls || '') + '">' + val + '</span></div>');
 
   row('Taken', new Date(r.endedAt).toLocaleString());
   row('Duration', fmtDur(r.durationMs));
@@ -295,29 +392,21 @@ function renderReceipt(r) {
   const p = r.metrics.pulse;
   row('Pulse', p.value != null
     ? p.value + ' bpm' + (p.confidence != null ? ' · ' + p.confidence.toFixed(0) + '% confidence' : '')
-    : 'not measured',
-    p.value != null ? '' : 'null');
+    : 'not measured', p.value != null ? '' : 'null');
 
   const b = r.metrics.breathing;
   row('Breathing', b.value != null
     ? b.value + ' breaths/min' + (b.confidence != null ? ' · ' + b.confidence.toFixed(0) + '% confidence' : '')
-    : 'not measured',
-    b.value != null ? '' : 'null');
+    : 'not measured', b.value != null ? '' : 'null');
 
-  $('rbody').innerHTML = rows.join('') +
-    `<div class="rline"><span class="lab">Conditions</span><span class="val">${r.conditions.map(c => c.condition).join(', ')}</span></div>`;
+  row('Conditions', r.conditions.map((c) => c.condition).join(', '));
 
-  $('rsub').textContent = r.file
-    ? 'Saved to receipts/' + r.file
-    : 'Written, but not saved to disk.';
+  $('rbody').innerHTML = rows.join('');
+  $('rsub').textContent = r.file ? 'Saved to receipts/' + r.file : 'Written, but not saved to disk.';
 
   const dl = $('downloadBtn');
-  if (r.file) {
-    dl.href = '/receipts/' + r.file;
-    dl.classList.remove('hidden');
-  } else {
-    dl.classList.add('hidden');
-  }
+  if (r.file) { dl.href = '/receipts/' + r.file; dl.classList.remove('hidden'); }
+  else dl.classList.add('hidden');
 }
 
 // ---- wiring ----
@@ -338,7 +427,7 @@ $('stopBtn').onclick = async () => {
   }, 1500);
 };
 
-$('againBtn').onclick = () => { show('idle'); };
+$('againBtn').onclick = () => show('idle');
 
 const es = new EventSource('/events');
 es.addEventListener('state', (e) => render(JSON.parse(e.data)));
@@ -346,8 +435,10 @@ es.addEventListener('tick', (e) => { tick = JSON.parse(e.data); renderTick(); })
 es.addEventListener('receipt', (e) => renderReceipt(JSON.parse(e.data)));
 es.addEventListener('notice', (e) => console.log('notice:', JSON.parse(e.data).text));
 
-// keep the "warming up" copy honest without needing a server push
-setInterval(() => { if (latest && latest.phase === 'measuring' && latest.startedAt) render(latest); }, 1000);
+// Keep "warming up" honest without needing a server push for every frame.
+setInterval(() => {
+  if (latest && latest.phase === 'measuring' && latest.startedAt) render(latest);
+}, 1000);
 </script>
 </body>
 </html>
