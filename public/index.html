@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lamplight</title>
+<style>
+  :root {
+    --ink: #0b0d10;
+    --panel: #12161b;
+    --line: #1f262e;
+    --dim: #6b7784;
+    --text: #e8edf2;
+    --amber: #f0a828;
+    --amber-soft: rgba(240,168,40,.12);
+    --red: #e2564a;
+    --green: #4ea87a;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--text);
+    font: 15px/1.55 ui-sans-serif, -apple-system, "Segoe UI", system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px 20px;
+  }
+  .app { width: 100%; max-width: 760px; }
+
+  header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 28px; }
+  .mark {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: radial-gradient(circle at 50% 38%, var(--amber) 0%, #7a5312 62%, #2a1d08 100%);
+    box-shadow: 0 0 26px rgba(240,168,40,.42);
+    align-self: center;
+  }
+  h1 { font-size: 19px; font-weight: 600; margin: 0; letter-spacing: -.01em; }
+  .tag { color: var(--dim); font-size: 13px; }
+
+  .stage {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px 26px 22px;
+    min-height: 300px;
+    display: flex; flex-direction: column;
+  }
+
+  /* ---- idle ---- */
+  .idle h2 { margin: 0 0 8px; font-size: 22px; font-weight: 600; letter-spacing: -.02em; }
+  .idle p { margin: 0 0 6px; color: var(--dim); max-width: 52ch; }
+  .idle ul { margin: 16px 0 22px; padding-left: 18px; color: var(--dim); font-size: 14px; }
+  .idle li { margin-bottom: 5px; }
+
+  /* ---- measuring: the cause ---- */
+  .cause-eyebrow { font-size: 11px; letter-spacing: .13em; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+  .cause-title {
+    font-size: 27px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2;
+    margin: 0 0 12px; color: var(--amber);
+  }
+  .cause-fix {
+    font-size: 16px; color: var(--text); margin: 0 0 4px;
+    padding-left: 14px; border-left: 2px solid var(--amber);
+  }
+  .cause-clear .cause-title { color: var(--green); }
+  .cause-clear .cause-fix { border-left-color: var(--green); }
+
+  .status-line {
+    margin-top: 22px; font-size: 13px; color: var(--dim);
+    display: flex; gap: 18px; flex-wrap: wrap;
+    border-top: 1px solid var(--line); padding-top: 14px;
+  }
+  .status-line b { color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  /* ---- readings ---- */
+  .readings { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: auto; padding-top: 22px; }
+  .card { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: #0e1216; }
+  .card .k { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+  .card .v { font-size: 30px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .card .u { font-size: 13px; color: var(--dim); font-weight: 400; margin-left: 3px; }
+  .card .m { font-size: 12px; color: var(--dim); margin-top: 3px; }
+  .card.pending .v { font-size: 15px; font-weight: 400; color: var(--dim); letter-spacing: 0; }
+  .card.empty .v { color: var(--red); font-size: 15px; font-weight: 500; letter-spacing: 0; }
+
+  /* ---- receipt ---- */
+  .receipt h2 { margin: 0 0 4px; font-size: 20px; font-weight: 600; }
+  .receipt .sub { color: var(--dim); font-size: 13px; margin-bottom: 20px; }
+  .rline { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .rline:last-of-type { border-bottom: 0; }
+  .rline .lab { color: var(--dim); }
+  .rline .val { font-variant-numeric: tabular-nums; text-align: right; }
+  .null { color: var(--red); }
+  .statement {
+    margin-top: 18px; padding: 12px 14px; border-radius: 10px;
+    background: var(--amber-soft); border: 1px solid rgba(240,168,40,.25);
+    font-size: 13px; color: #f7dcae;
+  }
+
+  /* ---- buttons ---- */
+  .actions { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+  button {
+    font: inherit; font-weight: 500; padding: 11px 20px; border-radius: 10px;
+    border: 1px solid var(--line); background: #1a2028; color: var(--text);
+    cursor: pointer; transition: background .12s, border-color .12s;
+  }
+  button:hover:not(:disabled) { background: #222b35; border-color: #2c3742; }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { background: var(--amber); border-color: var(--amber); color: #1a1200; font-weight: 600; }
+  button.primary:hover:not(:disabled) { background: #ffb93d; border-color: #ffb93d; }
+  a.btn { font: inherit; font-weight: 500; padding: 11px 20px; border-radius: 10px; border: 1px solid var(--line);
+          background: #1a2028; color: var(--text); text-decoration: none; display: inline-block; }
+  a.btn:hover { background: #222b35; }
+
+  .err { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: rgba(226,86,74,.1);
+         border: 1px solid rgba(226,86,74,.3); color: #f2b3ad; font-size: 13px; }
+  .foot { margin-top: 18px; font-size: 12px; color: #4d5764; text-align: center; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="mark"></div>
+    <h1>Lamplight</h1>
+    <span class="tag">measures whether your room can be read</span>
+  </header>
+
+  <div class="stage">
+    <!-- IDLE -->
+    <section id="idle" class="idle">
+      <h2>Sit down and hold still.</h2>
+      <p>Lamplight reads your pulse and breathing from the webcam, and tells you what to change when the room gets in the way.</p>
+      <ul>
+        <li>Face the screen with your upper body visible</li>
+        <li>Pulse takes about 12 seconds, breathing about 30</li>
+        <li>If it can't read you, it will say why — and never make a number up</li>
+      </ul>
+      <div class="actions">
+        <button id="startBtn" class="primary">Start measuring</button>
+      </div>
+      <div class="err hidden" id="idleErr"></div>
+    </section>
+
+    <!-- MEASURING -->
+    <section id="measuring" class="hidden">
+      <div class="cause-eyebrow" id="causeEyebrow">Camera</div>
+      <h2 class="cause-title" id="causeTitle">Starting…</h2>
+      <p class="cause-fix" id="causeFix">Waiting for the first frames.</p>
+
+      <div class="readings">
+        <div class="card pending" id="pulseCard">
+          <div class="k">Pulse</div>
+          <div class="v" id="pulseVal">warming up…</div>
+          <div class="m" id="pulseMeta">&nbsp;</div>
+        </div>
+        <div class="card pending" id="breathCard">
+          <div class="k">Breathing</div>
+          <div class="v" id="breathVal">warming up…</div>
+          <div class="m" id="breathMeta">&nbsp;</div>
+        </div>
+      </div>
+
+      <div class="status-line">
+        <span><b id="elapsed">0s</b> elapsed</span>
+        <span><b id="packets">0</b> packets</span>
+        <span><b id="samples">0</b> readings seen</span>
+      </div>
+
+      <div class="actions">
+        <button id="stopBtn">Finish &amp; write receipt</button>
+      </div>
+    </section>
+
+    <!-- RECEIPT -->
+    <section id="receipt" class="receipt hidden">
+      <h2>Measurement receipt</h2>
+      <div class="sub" id="rsub">A local record of exactly what was and wasn't measured.</div>
+      <div id="rbody"></div>
+      <div class="statement">
+        Values shown in red were <strong>not measured</strong>. Lamplight does not estimate, infer, or fill in a reading it did not receive.
+      </div>
+      <div class="actions">
+        <a class="btn" id="downloadBtn" href="#" download>Download receipt</a>
+        <button id="againBtn">Measure again</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="foot">Nothing is uploaded. The receipt stays on this computer.</div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const show = (id) => { for (const s of ['idle','measuring','receipt']) $(s).classList.toggle('hidden', s !== id); };
+
+let WARMUP = { pulse: 12000, breathing: 30000 };
+let latest = null;
+let tick = { elapsedMs: 0, packets: 0 };
+
+function fmtDur(ms) {
+  const s = Math.floor(ms / 1000);
+  return s < 60 ? s + 's' : Math.floor(s / 60) + 'm ' + (s % 60) + 's';
+}
+
+function render(s) {
+  latest = s;
+
+  if (s.phase === 'idle') { show('idle'); return; }
+  if (s.phase === 'error') {
+    show('idle');
+    const e = $('idleErr');
+    e.textContent = s.error || 'Something went wrong.';
+    e.classList.remove('hidden');
+    return;
+  }
+  if (s.phase === 'stopped') { return; }
+
+  show('measuring');
+
+  const waiting = s.phase === 'starting' || !s.startedAt;
+
+  // The cause is the headline. If there is no cause, say the room is fine.
+  const box = $('measuring');
+  if (waiting) {
+    $('causeEyebrow').textContent = 'Camera';
+    $('causeTitle').textContent = 'Starting…';
+    $('causeFix').textContent = 'Waiting for the first frames.';
+    box.classList.remove('cause-clear');
+  } else if (s.cause) {
+    $('causeEyebrow').textContent = 'The room';
+    $('causeTitle').textContent = s.cause.label;
+    $('causeFix').textContent = s.cause.fix;
+    box.classList.remove('cause-clear');
+  } else {
+    $('causeEyebrow').textContent = 'The room';
+    $('causeTitle').textContent = 'Clear';
+    $('causeFix').textContent = 'The camera can see you. Hold still.';
+    box.classList.add('cause-clear');
+  }
+
+  const age = s.startedAt ? Date.now() - s.startedAt : 0;
+
+  // Pulse
+  const p = s.pulse;
+  const pCard = $('pulseCard');
+  if (p) {
+    pCard.className = 'card';
+    $('pulseVal').innerHTML = p.value.toFixed(0) + '<span class="u">bpm</span>';
+    const bits = [];
+    if (p.confidence != null) bits.push('confidence ' + p.confidence.toFixed(0) + '%');
+    bits.push(p.stable ? 'stable' : 'settling');
+    $('pulseMeta').textContent = bits.join(' · ');
+  } else {
+    pCard.className = 'card pending';
+    $('pulseVal').textContent = age < WARMUP.pulse ? 'warming up…' : 'listening for a pulse…';
+    $('pulseMeta').innerHTML = '&nbsp;';
+  }
+
+  // Breathing
+  const b = s.breathing;
+  const bCard = $('breathCard');
+  if (b) {
+    bCard.className = 'card';
+    $('breathVal').innerHTML = b.value.toFixed(0) + '<span class="u">/min</span>';
+    const bits = [];
+    if (b.confidence != null) bits.push('confidence ' + b.confidence.toFixed(0) + '%');
+    bits.push(b.stable ? 'stable' : 'settling');
+    $('breathMeta').textContent = bits.join(' · ');
+  } else {
+    bCard.className = 'card pending';
+    $('breathVal').textContent = age < WARMUP.breathing ? 'warming up…' : 'listening for breathing…';
+    $('breathMeta').innerHTML = '&nbsp;';
+  }
+}
+
+function renderTick() {
+  $('elapsed').textContent = fmtDur(tick.elapsedMs);
+  $('packets').textContent = tick.packets;
+  const s = (tick.pulseSamples || 0) + (tick.breathSamples || 0);
+  $('samples').textContent = s;
+}
+
+function renderReceipt(r) {
+  show('receipt');
+  const rows = [];
+  const row = (lab, val, cls) => rows.push(
+    `<div class="rline"><span class="lab">${lab}</span><span class="val ${cls || ''}">${val}</span></div>`
+  );
+
+  row('Taken', new Date(r.endedAt).toLocaleString());
+  row('Duration', fmtDur(r.durationMs));
+  row('Packets received', r.packets);
+
+  const p = r.metrics.pulse;
+  row('Pulse', p.value != null
+    ? p.value + ' bpm' + (p.confidence != null ? ' · ' + p.confidence.toFixed(0) + '% confidence' : '')
+    : 'not measured',
+    p.value != null ? '' : 'null');
+
+  const b = r.metrics.breathing;
+  row('Breathing', b.value != null
+    ? b.value + ' breaths/min' + (b.confidence != null ? ' · ' + b.confidence.toFixed(0) + '% confidence' : '')
+    : 'not measured',
+    b.value != null ? '' : 'null');
+
+  $('rbody').innerHTML = rows.join('') +
+    `<div class="rline"><span class="lab">Conditions</span><span class="val">${r.conditions.map(c => c.condition).join(', ')}</span></div>`;
+
+  $('rsub').textContent = r.file
+    ? 'Saved to receipts/' + r.file
+    : 'Written, but not saved to disk.';
+
+  const dl = $('downloadBtn');
+  if (r.file) {
+    dl.href = '/receipts/' + r.file;
+    dl.classList.remove('hidden');
+  } else {
+    dl.classList.add('hidden');
+  }
+}
+
+// ---- wiring ----
+$('startBtn').onclick = async () => {
+  $('idleErr').classList.add('hidden');
+  $('startBtn').disabled = true;
+  await fetch('/api/start', { method: 'POST' });
+  setTimeout(() => { $('startBtn').disabled = false; }, 1200);
+};
+
+$('stopBtn').onclick = async () => {
+  $('stopBtn').disabled = true;
+  $('stopBtn').textContent = 'Stopping…';
+  await fetch('/api/stop', { method: 'POST' });
+  setTimeout(() => {
+    $('stopBtn').disabled = false;
+    $('stopBtn').textContent = 'Finish & write receipt';
+  }, 1500);
+};
+
+$('againBtn').onclick = () => { show('idle'); };
+
+const es = new EventSource('/events');
+es.addEventListener('state', (e) => render(JSON.parse(e.data)));
+es.addEventListener('tick', (e) => { tick = JSON.parse(e.data); renderTick(); });
+es.addEventListener('receipt', (e) => renderReceipt(JSON.parse(e.data)));
+es.addEventListener('notice', (e) => console.log('notice:', JSON.parse(e.data).text));
+
+// keep the "warming up" copy honest without needing a server push
+setInterval(() => { if (latest && latest.phase === 'measuring' && latest.startedAt) render(latest); }, 1000);
+</script>
+</body>
+</html>

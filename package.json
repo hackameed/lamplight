@@ -1,0 +1,16 @@
+{
+  "name": "lamplight",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Measures whether a camera can actually read you, and tells you what to change when the room is the problem.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@smartspectra/node-sdk": "3.5.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
